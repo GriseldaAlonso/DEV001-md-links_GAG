@@ -1,6 +1,6 @@
 const { mdLinks } = require('./index.js');
 
-mdLinks('./carpeta de prueba')
+mdLinks('./readme.md', 'validate')
   .then(() => {})
   .catch((error) => {
     console.log(error);

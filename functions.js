@@ -1,5 +1,6 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const { readFile } = require("fs/promises");//Promesa 
+const path = require("path");
 
 // identifica si la ruta existe o no
 const pathExist = (param) => fs.existsSync(param);
@@ -12,7 +13,7 @@ const getAbsolutePath = (paths) => {
 // chequear si la extensión corresponde a un archivo md
 const isFileMd = (pathAbsolute) => {
   const filePath = path.extname(pathAbsolute);
-  if (filePath === '.md') {
+  if (filePath === ".md") {
     return true;
   }
   return false;
@@ -22,10 +23,10 @@ const isFileMd = (pathAbsolute) => {
 const isDirectory = (pathAbsolute) => fs.statSync(pathAbsolute).isDirectory();
 
 // función para leer el directorio buscando archivos md
-let arrayFileMd = [];
+let arrayFilesMd = [];
 const searchFilesMd = (param) => {
   if (!isDirectory(param) && isFileMd(param)) {
-    arrayFileMd.push(param);
+    arrayFilesMd.push(param);
   } else {
     // constante para leer el directorio
     const readDir = fs.readdirSync(param);
@@ -37,35 +38,22 @@ const searchFilesMd = (param) => {
         searchFilesMd(list);
       } else if (isFileMd(list)) {
         // guardando cada archivo md dentro del array
-        arrayFileMd.push(list);
+        arrayFilesMd.push(list);
       }
     });
   }
-  console.log('estamos en arrayFileMd', arrayFileMd);
-  return arrayFileMd;
+  return arrayFilesMd;
 };
 
-// leer el archivo si es una extensión md
-const readFiles = (pathMd) =>
-  new Promise((resolve, reject) => {
-    fs.readFile(pathMd, 'utf-8', function (error, data) {
-      if (error) {
-        reject('Ocurrio un Error');
-      } else {
-        resolve(data);
-      }
-    });
-  });
 
 // obtener los links dentro del archivo md
-
 const getLinks = (pathsMd) => {
   return new Promise((resolve, reject) => {
     const links = [];
     // iterar el array para convertir a string cada path
-    pathsMd.map((pathMd) => {
+    pathsMd.forEach((pathMd) => {
       const str = pathMd.toString();
-      readFiles(str) // leer cada archivo md para obtener los links
+      readFile(str, "utf-8") // leer cada archivo md para obtener los links
         .then((data) => {
           const regex = /\[(.+?)\]\((https?:\/\/[^\s)]+)\)/g;
           let match = regex.exec(data);
@@ -78,19 +66,55 @@ const getLinks = (pathsMd) => {
             match = regex.exec(data);
           }
           resolve(links);
-          console.log('cada link en el archivo md', links);
         })
         .catch((error) => reject(error));
     });
   });
 };
 
+// Validando los links
+const validateLinks = (links) => {
+  const linksValidated = links.map((link) => {
+    return fetch(link.href).then((res) => {
+        if (res.status >= 200 && res.status <= 299) {
+          return {
+            href: link.href,
+            text: link.text,
+            file: link.file,
+            status: res.status,
+            OK: res.statusText,
+          };
+        } else if (res.status >= 400 && res.status <= 499) {
+          return {
+            href: link.href,
+            text: link.text,
+            file: link.file,
+            status: res.status,
+            OK: 'Fail',
+          };
+        }
+      })
+      .catch((error) => {
+         return {
+            href: link.href,
+            text: link.text,
+            file: link.file,
+            OK: 'Fail',
+            status: error.message,
+            message: error.cause,
+          };
+      });
+  });
+  return Promise.all(linksValidated);
+};
+
+
 module.exports = {
   pathExist,
   getAbsolutePath,
   isFileMd,
-  readFiles,
   searchFilesMd,
   isDirectory,
   getLinks,
+  validateLinks
 };
