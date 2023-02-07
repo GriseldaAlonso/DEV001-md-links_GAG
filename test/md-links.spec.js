@@ -10,13 +10,14 @@ const {
 const { mdLinks } = require('../index.js');
 const tryPathAbsolute = `${process.cwd()}`;
 const tryPathTest = [`${tryPathAbsolute}\\test\\pruebaTest.md`];
+let options = {validate: true};
 const fetch = require('node-fetch');
 jest.mock('node-fetch');
 
 describe('mdLinks', () => {
   it('Debería devolver una promesa', () => {
-    mdLinks('./test/pruebaTest.md', true).then(() => {
-      expect(mdLinks('./test/pruebaTest.md', true)).toBe(typeof Promise);
+    mdLinks('./test/pruebaTest.md', options).then(() => {
+      expect(mdLinks('./test/pruebaTest.md', options)).toBe(typeof Promise);
     });
   });
   it('Debería rechazar la promesa si el path no existe', () => {
@@ -27,8 +28,27 @@ describe('mdLinks', () => {
     mdLinks(`${tryPathAbsolute}\\test`);
     expect(pathExist(`${tryPathAbsolute}\\test`)).toEqual(true);
   });
+  it('Debería retornar un array con los links encontrados', () => {
+    mdLinks(`${tryPathAbsolute}\\test\\pruebaTest.md`, options = false).then( async () => {
+      const linksForTest = [
+        {
+          href: 'https://www.javascripttutorial.net/javascript-dom/javascript-innerhtml-vs-createelement/',
+          text: 'Diferencia entre createElement e innerHTML',
+          file: `${tryPathAbsolute}\\test\\pruebaTest.md`
+        },
+        {
+          href: 'https://www.todojs.com/tipos-datos-javascript-es6/',
+          text: 'Diferencia entre datos atómicos y estructurados',
+          file: `${tryPathAbsolute}\\test\\pruebaTest.md`
+        }
+      ];
+      return await getLinks([tryPathTest]).then((res) => {
+        expect(res).toEqual(linksForTest);
+      });
+    });
+  });
   it('Debería devolver una promesa', async () => {
-    mdLinks('./test/pruebaTest.md', true).then(async () => {
+    mdLinks('./test/pruebaTest.md', options = true).then(async () => {
       const arrayLinksValidated = [
         {
           href: 'https://www.javascripttutorial.net/javascript-dom/javascript-innerhtml-vs-createelement/',
@@ -69,7 +89,6 @@ describe('mdLinks', () => {
           }
         ]);
       });
-      expect(mdLinks('./test/pruebaTest.md', true)).toEqual();
     });
   });
   it('Debería rechazar la promesa si el path no es ni un directorio ni un archivo md', () => {

@@ -110,6 +110,25 @@ const validateLinks = (links) => {
   return Promise.all(linksValidated);
 };
 
+/*Funciones para trabajar con el argumento stats*/
+const statLinks = (arrLinks) => {
+  const uniqueLinks = new Set(arrLinks.map((link) => link.href)).size;
+  return {
+    Total: arrLinks.length,
+    Unique: uniqueLinks
+  }
+};
+
+const statAndValidateLinks = (arrLinks) => {
+  const uniqueLinks = new Set(arrLinks.map((link) => link.href)).size;
+  const brokenLinks = arrLinks.filter((link) => link.OK === 'Fail');
+  return {
+    Total: arrLinks.length,
+    Unique: uniqueLinks,
+    Broken: brokenLinks.length
+  } 
+};
+
 module.exports = {
   pathExist,
   getAbsolutePath,
@@ -118,4 +137,6 @@ module.exports = {
   isDirectory,
   getLinks,
   validateLinks,
+  statLinks,
+  statAndValidateLinks
 };
