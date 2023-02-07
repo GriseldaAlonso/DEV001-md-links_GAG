@@ -1,3 +1,5 @@
+#!/usr/bin/env nodo
+
 const { mdLinks } = require('./index.js');
 const { statLinks, statAndValidateLinks } = require('./functions')
 
