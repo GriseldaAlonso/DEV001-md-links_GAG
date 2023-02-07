@@ -6,12 +6,42 @@ const {
   isFileMd,
   isDirectory,
   searchFilesMd,
-  validateLinks
+  validateLinks,
+  statLinks,
+  statAndValidateLinks
  } = require('../functions.js')
  const tryPathAbsolute = `${process.cwd()}`;
  const tryPathTest = [`${tryPathAbsolute}\\test\\pruebaTest.md`];
  const fetch = require('node-fetch');
  jest.mock('node-fetch');
+
+ const arrayLinksValidatedFailCatch = [
+  {
+    href: 'http://community.laboratoria.la/t/modulos-librerias-paquetes-frameworks-cual-es-la-diferencia/175',
+    text: 'Módulos, librerías, paquetes, frameworks... ¿cuál es la diferencia?',
+    file: `${tryPathAbsolute}\\CarpetaDePrueba\\Prueba\\README-mdlinks-para-prueba.md`,
+    OK: 'Fail',
+    status: 'fetch failed',
+    message: 'Error: getaddrinfo ENOTFOUND community.laboratoria.la'
+  }
+];
+
+const arrayLinksValidated = [
+  {
+    href: 'https://www.javascripttutorial.net/javascript-dom/javascript-innerhtml-vs-createelement/',
+    text: 'Diferencia entre createElement e innerHTML',
+    file: `${tryPathAbsolute}\\test\\pruebaTest.md`,
+    status: 200,
+    OK: 'OK'
+  },
+  {
+    href: 'https://www.todojs.com/tipos-datos-javascript-es6/',
+    text: 'Diferencia entre datos atómicos y estructurados',
+    file: `${tryPathAbsolute}\\test\\pruebaTest.md`,
+    status: 200,
+    OK: 'OK'
+  }
+];
  /* --------------------------------------------- testeo de functions -----------------------------------------------------*/
 
 describe('pathExist', () => {
@@ -73,22 +103,6 @@ describe('getLinks', () => {
 });
 describe('validateLinks', () => {
   it('Debería retornar un array de objetos con las propiedades de los links validados', async () => {
-    const arrayLinksValidated = [
-      {
-        href: 'https://www.javascripttutorial.net/javascript-dom/javascript-innerhtml-vs-createelement/',
-        text: 'Diferencia entre createElement e innerHTML',
-        file: `${tryPathAbsolute}\\test\\pruebaTest.md`,
-        status: 200,
-        OK: 'OK'
-      },
-      {
-        href: 'https://www.todojs.com/tipos-datos-javascript-es6/',
-        text: 'Diferencia entre datos atómicos y estructurados',
-        file: `${tryPathAbsolute}\\test\\pruebaTest.md`,
-        status: 200,
-        OK: 'OK'
-      }
-    ];
     fetch.mockImplementationOnce(() => 
     Promise.resolve({
       status: 200,
@@ -143,16 +157,6 @@ describe('validateLinks', () => {
     });
   });
   it('Debería retornar un array de objetos con las propiedades de los links validados', async () => {
-    const arrayLinksValidatedFailCatch = [
-      {
-        href: 'http://community.laboratoria.la/t/modulos-librerias-paquetes-frameworks-cual-es-la-diferencia/175',
-        text: 'Módulos, librerías, paquetes, frameworks... ¿cuál es la diferencia?',
-        file: `${tryPathAbsolute}\\CarpetaDePrueba\\Prueba\\README-mdlinks-para-prueba.md`,
-        OK: 'Fail',
-        status: 'fetch failed',
-        message: 'Error: getaddrinfo ENOTFOUND community.laboratoria.la'
-      }
-    ];
     fetch.mockImplementationOnce(() => 
     Promise.resolve({
       OK: 'Fail',
@@ -171,6 +175,25 @@ describe('validateLinks', () => {
           message: 'Error: getaddrinfo ENOTFOUND community.laboratoria.la'
         }
       ]);
+    });
+  });
+});
+describe('statLinks', () => {
+  it('Debería retornar un objeto con las propiedades Total: (numero de links totales) y Unique: (total de links unicos)', () => {
+    statLinks(arrayLinksValidated);
+    expect(statLinks(arrayLinksValidated)).toEqual({
+      Total: 2,
+      Unique: 2
+    });
+  });
+});
+describe('statAndValidateLinks', () => {
+  it('Debería retornar un objeto con propiedades de total de links, unicos y rotos(broken)', () => {
+    statAndValidateLinks(arrayLinksValidated);
+    expect(statAndValidateLinks(arrayLinksValidated)).toEqual({
+      Total: 2,
+      Unique: 2,
+      Broken: 0
     });
   });
 });

@@ -8,7 +8,7 @@ const {
   validateLinks,
 } = require('./functions.js');
 
-const mdLinks = (path, options) =>
+const mdLinks = (path, options = {validate: false}) =>
   new Promise((resolve, reject) => {
     // variable que contendrá el arreglo de archivos md
     let files;
@@ -40,9 +40,9 @@ const mdLinks = (path, options) =>
                 `No se encontraron links en el archivo con ruta: ${pathAbsolute}`
               );
             } else {
-              if (options === false) {
+              if (options.validate === false) {
                 return resolve(links);
-              } else if (options === true) {
+              } else if (options.validate === true) {
                 Promise.all([validateLinks(links)]).then((res) => {
                   arrValidateLinks = res.flat();
                   resolve(arrValidateLinks);
