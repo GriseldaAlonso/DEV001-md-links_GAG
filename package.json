@@ -32,7 +32,7 @@
     "url": "https://github.com/GriseldaAlonso/DEV001-md-links_GAG/issues"
   },
   "bin": {
-    "md-links": "./cli.js"
+    "md-Links": "./cli.js"
   },
   "homepage": "https://github.com/GriseldaAlonso/DEV001-md-links_GAG#readme",
   "devDependencies": {

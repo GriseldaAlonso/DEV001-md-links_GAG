@@ -8,7 +8,8 @@ const validate = opt.includes('--validate');
 const stats = opt.includes('--stats');
 
 
-mdLinks(route, { validate })
+const cliUSer = (route) => {
+  mdLinks(route, { validate })
   .then((res) => {
     if (validate && stats) {
       console.log(statAndValidateLinks(res))
@@ -23,3 +24,6 @@ mdLinks(route, { validate })
   .catch((error) => {
     console.log(error);
   });
+};
+
+cliUSer(route);
